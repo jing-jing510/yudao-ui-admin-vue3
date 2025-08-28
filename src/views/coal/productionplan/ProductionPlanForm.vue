@@ -41,7 +41,7 @@
         <el-date-picker
           v-model="formData.planDate"
           type="date"
-          value-format="x"
+          value-format="YYYY-MM-DD"
           placeholder="选择计划日期"
         />
       </el-form-item>
@@ -199,6 +199,7 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
+  console.log(formData.value)
   // 校验表单
   await formRef.value.validate()
   // 提交请求
