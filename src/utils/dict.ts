@@ -249,6 +249,23 @@ export enum DICT_TYPE {
   // ========== IOT - 生产计划模块  ==========
   PLAN_STATUS= 'plan_status',
   PLAN_LEVEL = 'plan_level',
-  PLAN_TYPE = 'plan_type'
+  PLAN_TYPE = 'plan_type',
+
+  // ========== IOT - 排班模块  ==========
+  IS_PRODUCTION = 'is_production',        // 是否生产班制
+  IS_PRODUCTION_DAY = 'is_production_day', // 是否生产日
+  IS_LEADER = 'is_leader',                // 是否班组长
+  IS_SUBSTITUTE = 'is_substitute',        // 是否替班
+  SHIFT_TYPE = 'shift_type',              // 班次类型
+  POSITION_TYPE = 'position_type',        // 岗位类型
+  SCHEDULE_STATUS = 'schedule_status',    // 排班状态
+  SCHEDULE_TYPE = 'schedule_type',        // 排班类型
+  WORK_STATUS = 'work_status',            // 工作状态
+
+  // ========== COAL - 设备管理模块  ==========
+  EQUIPMENT_STATUS = 'equipment_status',                    // 设备状态
+  EQUIPMENT_HEALTH_LEVEL = 'equipment_health_level',        // 设备健康等级
+  EQUIPMENT_IMPORTANCE_LEVEL = 'equipment_importance_level', // 设备重要度
+  EQUIPMENT_CATEGORY_LEVEL = 'equipment_category_level'      // 设备分类层级
 
 }
