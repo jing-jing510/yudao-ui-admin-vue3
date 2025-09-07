@@ -31,6 +31,21 @@
           class="!w-240px"
         />
       </el-form-item>
+      <el-form-item label="备件类型" prop="sparePartType">
+        <el-select
+          v-model="queryParams.sparePartType"
+          placeholder="请选择备件类型"
+          clearable
+          class="!w-240px"
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.SPARE_PART_TYPE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -86,6 +101,27 @@
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
+      <el-table-column label="备件类型" align="center" prop="sparePartType" width="100">
+        <template #default="scope">
+          <dict-tag v-if="scope.row.sparePartType" :type="DICT_TYPE.SPARE_PART_TYPE" :value="scope.row.sparePartType" />
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="关联设备" align="center" prop="equipmentName" width="120">
+        <template #default="scope">
+          <span v-if="scope.row.equipmentName">{{ scope.row.equipmentName }}</span>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="库存预警" align="center" width="120">
+        <template #default="scope">
+          <el-tag v-if="scope.row.minStock && scope.row.currentStock !== undefined" 
+                  :type="scope.row.currentStock < scope.row.minStock ? 'danger' : 'success'">
+            {{ scope.row.currentStock || 0 }}/{{ scope.row.minStock }}
+          </el-tag>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
       <el-table-column
         label="创建时间"
         align="center"
@@ -133,7 +169,7 @@ import download from '@/utils/download'
 import { ProductApi, ProductVO } from '@/api/erp/product/product'
 import { ProductCategoryApi, ProductCategoryVO } from '@/api/erp/product/category'
 import ProductForm from './ProductForm.vue'
-import { DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { erpPriceTableColumnFormatter } from '@/utils'
 
@@ -150,7 +186,9 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: undefined,
-  categoryId: undefined
+  categoryId: undefined,
+  sparePartType: undefined,
+  hasSparePartType: undefined // 添加这个字段用于过滤
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中

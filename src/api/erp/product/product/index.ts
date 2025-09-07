@@ -1,5 +1,17 @@
 import request from '@/config/axios'
 
+// 备件管理查询参数
+export interface SparePartQueryParams {
+  pageNo?: number
+  pageSize?: number
+  name?: string
+  sparePartType?: number
+  equipmentId?: number
+  categoryId?: number
+  status?: number
+  hasSparePartType?: boolean
+}
+
 // ERP 产品 VO
 export interface ProductVO {
   id: number // 产品编号
@@ -16,6 +28,19 @@ export interface ProductVO {
   purchasePrice: number // 采购价格，单位：元
   salePrice: number // 销售价格，单位：元
   minPrice: number // 最低价格，单位：元
+  
+  // 备件管理扩展字段
+  equipmentId?: number // 关联设备ID
+  equipmentName?: string // 关联设备名称
+  sparePartType?: number // 备件类型
+  minStock?: number // 最小库存
+  maxStock?: number // 最大库存
+  safetyStock?: number // 安全库存
+  supplierName?: string // 供应商名称
+  replacementCycle?: number // 更换周期（天）
+  lastReplacementDate?: string // 上次更换日期
+  nextReplacementDate?: string // 下次更换日期
+  currentStock?: number // 当前库存
 }
 
 // ERP 产品 API
@@ -53,5 +78,15 @@ export const ProductApi = {
   // 导出产品 Excel
   exportProduct: async (params) => {
     return await request.download({ url: `/erp/product/export-excel`, params })
+  },
+
+  // 查询备件分页（专用于备件管理）
+  getSparePartPage: async (params: SparePartQueryParams) => {
+    return await request.get({ url: `/erp/product/page`, params })
+  },
+
+  // 查询备件精简列表（仅包含有备件类型的产品）
+  getSparePartSimpleList: async () => {
+    return await request.get({ url: `/erp/product/simple-list`, params: { hasSparePartType: true } })
   }
 }

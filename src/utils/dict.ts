@@ -215,6 +215,12 @@ export enum DICT_TYPE {
   // ========== ERP - 企业资源计划模块  ==========
   ERP_AUDIT_STATUS = 'erp_audit_status', // ERP 审批状态
   ERP_STOCK_RECORD_BIZ_TYPE = 'erp_stock_record_biz_type', // 库存明细的业务类型
+  
+  // 备件管理新增字典
+  SPARE_PART_TYPE = 'spare_part_type', // 备件类型
+  ALERT_TYPE = 'alert_type', // 预警类型
+  ALERT_LEVEL = 'alert_level', // 预警级别
+  ALERT_STATUS = 'alert_status', // 预警状态
 
   // ========== AI - 人工智能模块  ==========
   AI_PLATFORM = 'ai_platform', // AI 平台

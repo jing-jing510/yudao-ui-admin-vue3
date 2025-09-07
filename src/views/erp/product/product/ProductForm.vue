@@ -116,6 +116,96 @@
             />
           </el-form-item>
         </el-col>
+        <!-- 备件管理扩展字段 -->
+        <el-col :span="12">
+          <el-form-item label="备件类型" prop="sparePartType">
+            <el-select v-model="formData.sparePartType" clearable placeholder="请选择备件类型" class="!w-1/1">
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.SPARE_PART_TYPE)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="关联设备" prop="equipmentId">
+            <el-select v-model="formData.equipmentId" clearable placeholder="请选择关联设备" class="!w-1/1">
+              <el-option
+                v-for="equipment in equipmentList"
+                :key="equipment.id"
+                :label="equipment.equipmentName"
+                :value="equipment.id"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="最低库存" prop="minStock">
+            <el-input-number
+              v-model="formData.minStock"
+              placeholder="请输入最低库存预警数量"
+              :min="0"
+              :precision="2"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="最高库存" prop="maxStock">
+            <el-input-number
+              v-model="formData.maxStock"
+              placeholder="请输入最高库存数量"
+              :min="0"
+              :precision="2"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="安全库存" prop="safetyStock">
+            <el-input-number
+              v-model="formData.safetyStock"
+              placeholder="请输入安全库存数量"
+              :min="0"
+              :precision="2"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="更换周期(天)" prop="replacementCycle">
+            <el-input-number
+              v-model="formData.replacementCycle"
+              placeholder="请输入更换周期"
+              :min="0"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="最后更换日期" prop="lastReplacementDate">
+            <el-date-picker
+              v-model="formData.lastReplacementDate"
+              type="date"
+              value-format="YYYY-MM-DD"
+              placeholder="选择最后更换日期"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="下次更换日期" prop="nextReplacementDate">
+            <el-date-picker
+              v-model="formData.nextReplacementDate"
+              type="date"
+              value-format="YYYY-MM-DD"
+              placeholder="选择下次更换日期"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
         <el-col :span="24">
           <el-form-item label="备注" prop="remark">
             <el-input type="textarea" v-model="formData.remark" placeholder="请输入备注" />
@@ -133,6 +223,7 @@
 import { ProductApi, ProductVO } from '@/api/erp/product/product'
 import { ProductCategoryApi, ProductCategoryVO } from '@/api/erp/product/category'
 import { ProductUnitApi, ProductUnitVO } from '@/api/erp/product/unit'
+import { EquipmentInfoApi } from '@/api/coal/equipmentinfo'
 import { CommonStatusEnum } from '@/utils/constants'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
@@ -160,7 +251,17 @@ const formData = ref({
   weight: undefined,
   purchasePrice: undefined,
   salePrice: undefined,
-  minPrice: undefined
+  minPrice: undefined,
+  // 备件管理扩展字段
+  equipmentId: undefined,
+  sparePartType: undefined,
+  minStock: undefined,
+  maxStock: undefined,
+  safetyStock: undefined,
+  supplierId: undefined,
+  replacementCycle: undefined,
+  lastReplacementDate: undefined,
+  nextReplacementDate: undefined
 })
 const formRules = reactive({
   name: [{ required: true, message: '产品名称不能为空', trigger: 'blur' }],
@@ -172,6 +273,7 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 const categoryList = ref<ProductCategoryVO[]>([]) // 产品分类列表
 const unitList = ref<ProductUnitVO[]>([]) // 产品单位列表
+const equipmentList = ref<any[]>([]) // 设备列表
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -183,7 +285,13 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await ProductApi.getProduct(id)
+      const data = await ProductApi.getProduct(id)
+      // 处理日期字段
+      formData.value = {
+        ...data,
+        lastReplacementDate: data.lastReplacementDate ? data.lastReplacementDate.toString() : undefined,
+        nextReplacementDate: data.nextReplacementDate ? data.nextReplacementDate.toString() : undefined
+      }
     } finally {
       formLoading.value = false
     }
@@ -193,6 +301,14 @@ const open = async (type: string, id?: number) => {
   categoryList.value = handleTree(categoryData, 'id', 'parentId')
   // 产品单位
   unitList.value = await ProductUnitApi.getProductUnitSimpleList()
+  // 设备列表
+  try {
+    const equipmentData = await EquipmentInfoApi.getEquipmentInfoList({ pageNo: 1, pageSize: 1000 })
+    equipmentList.value = equipmentData.list || []
+  } catch (error) {
+    console.warn('获取设备列表失败:', error)
+    equipmentList.value = []
+  }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -228,14 +344,24 @@ const resetForm = () => {
     barCode: undefined,
     categoryId: undefined,
     unitId: undefined,
-    status: CommonStatusEnum.ENABLE,
+    status: CommonStatusEnum.ENABLE as number,
     standard: undefined,
     remark: undefined,
     expiryDay: undefined,
     weight: undefined,
     purchasePrice: undefined,
     salePrice: undefined,
-    minPrice: undefined
+    minPrice: undefined,
+    // 备件管理扩展字段
+    equipmentId: undefined,
+    sparePartType: undefined,
+    minStock: undefined,
+    maxStock: undefined,
+    safetyStock: undefined,
+    supplierId: undefined,
+    replacementCycle: undefined,
+    lastReplacementDate: undefined,
+    nextReplacementDate: undefined
   }
   formRef.value?.resetFields()
 }
