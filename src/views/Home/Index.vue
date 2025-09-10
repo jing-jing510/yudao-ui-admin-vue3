@@ -149,34 +149,32 @@
           </el-row>
         </el-skeleton>
       </el-card>
-      <el-card shadow="never" class="mt-8px">
-        <template #header>
-          <div class="h-3 flex justify-between">
-            <span>{{ t('workplace.notice') }}</span>
-            <el-link type="primary" :underline="false">{{ t('action.more') }}</el-link>
-          </div>
-        </template>
-        <el-skeleton :loading="loading" animated>
-          <div v-for="(item, index) in notice" :key="`dynamics-${index}`">
-            <div class="flex items-center">
-              <el-avatar :src="avatar" :size="35" class="mr-16px">
-                <img src="@/assets/imgs/avatar.gif" alt="" />
-              </el-avatar>
-              <div>
-                <div class="text-14px">
-                  <Highlight :keys="item.keys.map((v) => t(v))">
-                    {{ item.type }} : {{ item.title }}
-                  </Highlight>
-                </div>
-                <div class="mt-16px text-12px text-gray-400">
-                  {{ formatTime(item.date, 'yyyy-MM-dd') }}
-                </div>
-              </div>
-            </div>
-            <el-divider />
-          </div>
-        </el-skeleton>
-      </el-card>
+      <!-- 备件库存统计卡片 -->
+      <SparePartStockStatisticsCard :auto-refresh="true" />
+      
+      <!-- 备件使用频率分析卡片 -->
+      <SparePartUsageFrequencyCard :auto-refresh="true" />
+      
+      <!-- 备件预警待处理卡片 -->
+      <SparePartAlertCard :auto-refresh="true" />
+      
+      <!-- 设备维护业务流程卡片 -->
+      <EquipmentMaintenanceBusinessFlowCard :auto-refresh="true" />
+      
+      <!-- 生产调度业务流程卡片 -->
+      <ProductionScheduleBusinessFlowCard :auto-refresh="true" />
+      
+      <!-- 煤质管理业务流程卡片 -->
+      <CoalQualityManagementBusinessFlowCard :auto-refresh="true" />
+      
+      <!-- 安全管理业务流程卡片 -->
+      <SafetyManagementBusinessFlowCard :auto-refresh="true" />
+      
+      <!-- 能源管理业务流程卡片 -->
+      <EnergyManagementBusinessFlowCard :auto-refresh="true" />
+      
+      <!-- 能源管理概览卡片 -->
+      <EnergyManagementOverviewComplete />
     </el-col>
   </el-row>
 </template>
@@ -190,6 +188,15 @@ import { useUserStore } from '@/store/modules/user'
 import type { WorkplaceTotal, Project, Notice, Shortcut } from './types'
 import { pieOptions, barOptions } from './echarts-data'
 import { useRouter } from 'vue-router'
+import SparePartStockStatisticsCard from '@/components/SparePartStockStatisticsCard.vue'
+import SparePartUsageFrequencyCard from '@/components/SparePartUsageFrequencyCard.vue'
+import SparePartAlertCard from '@/components/SparePartAlertCard.vue'
+import EquipmentMaintenanceBusinessFlowCard from '@/components/EquipmentMaintenanceBusinessFlowCard.vue'
+import ProductionScheduleBusinessFlowCard from '@/components/ProductionScheduleBusinessFlowCard.vue'
+import CoalQualityManagementBusinessFlowCard from '@/components/CoalQualityManagementBusinessFlowCard.vue'
+import SafetyManagementBusinessFlowCard from '@/components/SafetyManagementBusinessFlowCard.vue'
+import EnergyManagementBusinessFlowCard from '@/components/EnergyManagementBusinessFlowCard.vue'
+import EnergyManagementOverviewComplete from '@/components/EnergyManagementOverviewComplete.vue'
 
 defineOptions({ name: 'Index' })
 
@@ -201,6 +208,7 @@ const loading = ref(true)
 const avatar = userStore.getUser.avatar
 const username = userStore.getUser.nickname
 const pieOptionsData = reactive<EChartsOption>(pieOptions) as EChartsOption
+
 // 获取统计数
 let totalSate = reactive<WorkplaceTotal>({
   project: 0,
@@ -397,6 +405,7 @@ const getWeeklyUserActivity = async () => {
     }
   ])
 }
+
 
 const getAllApi = async () => {
   await Promise.all([

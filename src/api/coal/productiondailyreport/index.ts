@@ -60,6 +60,34 @@ export interface ProductionDailyReport {
           remarks: string; // 备注信息
   }
 
+/** 生产日报统计信息 */
+export interface ProductionDailyReportStatistics {
+  todayProduction: {
+    statisticsDate: string
+    todayRawCoalInput: number
+    todayCleanCoalOutput: number
+    todayOperatingHours: number
+    todayReportCount: number
+    todayMissingReportCount: number
+  }
+  monthlyProduction: {
+    statisticsYear: number
+    statisticsMonth: number
+    monthlyOutput: number
+    monthlyCleanCoalOutput: number
+    monthlyProductionDays: number
+    monthlyAverageDailyOutput: number
+  }
+  overview: {
+    totalProductionDays: number
+    yearlyPlanCompletionRate: number
+    monthlyPlanCompletionRate: number
+    dailyPlanCompletionRate: number
+    activeStaffCount: number
+    totalUserCount: number
+  }
+}
+
 // 现场生产日报 API
 export const ProductionDailyReportApi = {
   // 查询现场生产日报分页
@@ -96,4 +124,9 @@ export const ProductionDailyReportApi = {
   exportProductionDailyReport: async (params) => {
     return await request.download({ url: `/coal/production-daily-report/export-excel`, params })
   },
-}
+
+  // 获取生产日报统计信息
+  getProductionDailyReportStatistics: async (): Promise<ProductionDailyReportStatistics> => {
+    return await request.get({ url: `/coal/production-daily-report/statistics` })
+  },
+}
